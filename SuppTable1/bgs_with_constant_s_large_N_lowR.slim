@@ -1,0 +1,56 @@
+//Int his case we increase N to 5e6 but do not change any other parameters
+// set up a simulation with BGS with constant s and rescaling
+//user defined parameters: d_seed, d_scale, d_L, d_repID, d_folder (output folder)
+initialize()
+{
+	//set population parameters
+	defineGlobal("scaling_factor", d_scale);
+	defineGlobal("Nreal", 5e6);//5e6
+	defineConstant("NSCALED", asInteger(Nreal/scaling_factor));
+	defineConstant("RUNTIME", 14*NSCALED);
+	setSeed(asInteger(d_seed));
+	
+	//set DFE parameters:
+	defineConstant("gamma", -100.0);
+	defineConstant("s_del", gamma/(2.0*NSCALED));
+	
+	// set the overall mutation rate
+	initializeMutationRate(scaling_factor*3e-9);
+
+	// set mutation types:
+	initializeMutationType("m1", 0.5, "f", 0.0);
+	initializeMutationType("m2", 0.5, "f", s_del);
+
+	//set genomic element types
+	initializeGenomicElementType("g1", c(m1, m2), c(1,1));
+	
+	// uniform chromosome of length defined by user 
+	initializeGenomicElement(g1, 0, d_L-1);
+
+	// uniform recombination along the chromosome 
+	initializeRecombinationRate(scaling_factor*1e-8);
+}
+
+// create a population of Nscaled individuals 
+1 early()
+{
+	sim.addSubpop("p1", NSCALED);
+	//community.rescheduleScriptBlock(s1, start=asInteger(14*Nscaled), end=asInteger(14*Nscaled));
+}
+// run to tick 14*Nscaled
+14*NSCALED late()
+{
+	print(sim.cycle);
+	sampled_haplosomes = sample(p1.haplosomes, 100);
+	pi_neutral = calcHeterozygosity(sampled_haplosomes, muts=sim.mutationsOfType(m1))/0.5;
+	print(pi_neutral);
+	writeFile(filePath=d_folder + "/output" + d_repID + "_sample100.txt", contents=paste("pi_neutral:", asFloat(pi_neutral), sep='\t'), append=F);
+	
+	sampled_haplosomes = sample(p1.haplosomes, 10);
+	pi_neutral = calcHeterozygosity(sampled_haplosomes, muts=sim.mutationsOfType(m1))/0.5;
+	writeFile(filePath=d_folder + "/output" + d_repID + "_sample10.txt", contents=paste("pi_neutral:", asFloat(pi_neutral), sep='\t'), append=F);
+	
+	sim.simulationFinished();
+}
+
+
