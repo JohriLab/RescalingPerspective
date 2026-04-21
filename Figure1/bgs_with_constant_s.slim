@@ -41,7 +41,15 @@ initialize()
 14*NSCALED late()
 {
 	pi_neutral = calcHeterozygosity(p1.haplosomes, muts=sim.mutationsOfType(m1))/0.5;
-	writeFile(filePath=d_folder + "/output" + d_repID + ".txt", contents=paste("pi_neutral:", asFloat(pi_neutral), sep='\t'), append=F);
+	writeFile(filePath=d_folder + "/output" + d_repID + "_popn.txt", contents=paste("pi_neutral:", asFloat(pi_neutral), sep='\t'), append=F);
+	
+	sampled_haplosomes = sample(p1.haplosomes, 10);
+        pi_neutral10 = calcHeterozygosity(sampled_haplosomes, muts=sim.mutationsOfType(m1))/0.5;
+	writeFile(filePath=d_folder + "/output" + d_repID + "_sample10.txt", contents=paste("pi_neutral:", asFloat(pi_neutral10), sep='\t'), append=F);
+	
+	sampled_haplosomes = sample(p1.haplosomes, 100);
+        pi_neutral100 = calcHeterozygosity(sampled_haplosomes, muts=sim.mutationsOfType(m1))/0.5;
+        writeFile(filePath=d_folder + "/output" + d_repID + "_sample100.txt", contents=paste("pi_neutral:", asFloat(pi_neutral100), sep='\t'), append=F);
 	sim.simulationFinished();
 }
 
